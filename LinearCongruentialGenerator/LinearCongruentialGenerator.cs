@@ -4,26 +4,32 @@ namespace LinearCongruentialGenerator
 {
     public class LinearCongruentialGenerator
     {
-        private int _x;
-        private readonly int _m;
-        private readonly int _a;
-        private readonly int _c;
+        public const int RecommendedMultiplier = 48271;
 
-        public LinearCongruentialGenerator(int seed, int m = int.MaxValue, int a = 48271, int c = 0)
+        private int _seed;
+        private readonly int _modulus;
+        private readonly int _multiplier;
+        private readonly int _increment;
+
+        public LinearCongruentialGenerator(
+            int seed,
+            int modulus = int.MaxValue,
+            int multiplier = RecommendedMultiplier,
+            int increment = 0)
         {
-            _x = seed != -1 ? seed : (int)(DateTime.Now.Ticks % m);
+            _seed = seed != -1 ? seed : (int)(DateTime.Now.Ticks % modulus);
 
-            _m = m;
-            _a = a;
+            _modulus = modulus;
+            _multiplier = multiplier;
 
-            _c = c;
+            _increment = increment;
         }
 
         public int Next()
         {
-            _x = ((_a * _x) + _c) % _m;
+            _seed = ((_multiplier * _seed) + _increment) % _modulus;
 
-            return _x;
+            return _seed;
         }
     }
 }
