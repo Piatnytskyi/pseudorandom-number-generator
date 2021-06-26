@@ -5,9 +5,9 @@ namespace LinearCongruentialGeneratorTest.Command
 {
     internal class RelayCommand : ICommand
     {
-        private readonly Action<object> command;
-        private readonly Predicate<object> canExecute;
-
+        private readonly Action<object> _execute;
+        private readonly Predicate<object> _canExecute;
+         
         public event EventHandler CanExecuteChanged
         {
             add { CommandManager.RequerySuggested += value; }
@@ -21,18 +21,18 @@ namespace LinearCongruentialGeneratorTest.Command
 
         public RelayCommand(Action<object> command, Predicate<object> canExecute)
         {
-            this.command = command ?? throw new ArgumentNullException(nameof(command));
-            this.canExecute = canExecute;
+            this._execute = command ?? throw new ArgumentNullException(nameof(command));
+            this._canExecute = canExecute;
         }
 
         public bool CanExecute(object parameter)
         {
-            return canExecute == null || canExecute(parameter);
+            return _canExecute == null || _canExecute(parameter);
         }
 
         public void Execute(object parameter)
         {
-            command.Invoke(parameter);
+            _execute.Invoke(parameter);
         }
     }
 }

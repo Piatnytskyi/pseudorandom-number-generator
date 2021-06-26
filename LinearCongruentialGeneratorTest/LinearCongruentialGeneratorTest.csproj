@@ -8,7 +8,10 @@
 
   <ItemGroup>
     <Folder Include="View\" />
-    <Folder Include="ViewModel\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LinearCongruentialGenerator\LinearCongruentialGenerator.csproj" />
   </ItemGroup>
 
 </Project>
