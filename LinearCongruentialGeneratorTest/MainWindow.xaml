@@ -1,13 +1,60 @@
-﻿<Window x:Class="LinearCongruentialGeneratorTest.MainWindow"
+﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LinearCongruentialGeneratorTest"
+        xmlns:model="clr-namespace:LinearCongruentialGeneratorTest.Model"
+            xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="LinearCongruentialGeneratorTest.MainWindow"
+            d:DataContext="{d:DesignInstance Type={x:Type model:LinearCongruentialGeneratorModel}}"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800"
+        Title="MainWindow" Height="280" Width="525"
         ResizeMode="NoResize">
     <Grid>
-
+        <Grid.RowDefinitions>
+            <RowDefinition Height="13*"/>
+            <RowDefinition Height="119*"/>
+        </Grid.RowDefinitions>
+        <DockPanel Grid.Row="0">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="N:&#xD;&#xA;"/>
+                <xctk:IntegerUpDown Text="{Binding LinearCongruentialGenerator.N}" Minimum="1" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="X0:&#xD;&#xA;"/>
+                    <TextBox Text="{Binding LinearCongruentialGenerator.Seed}" TextWrapping="Wrap"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="M:&#xD;&#xA;&#xD;&#xA;"/>
+                    <TextBox Text="{Binding LinearCongruentialGenerator.Modulus}" TextWrapping="Wrap"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="A:&#xD;&#xA;"/>
+                    <TextBox Text="{Binding LinearCongruentialGenerator.Multiplier}" TextWrapping="Wrap"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="C:&#xD;&#xA;"/>
+                    <TextBox Text="{Binding LinearCongruentialGenerator.Increment}" TextWrapping="Wrap"/>
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+        <StackPanel Orientation="Vertical" Grid.Row="1">
+            <Button Content="Generate" Command="{Binding GenerateCommand}" />
+            <TextBlock HorizontalAlignment="Center">
+                <Hyperlink Command="{Binding GoToGeneratedFileCommand}">Go to generated file.
+                    <Hyperlink.Style>
+                        <Style TargetType="{x:Type Hyperlink}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding GeneratedValues.Count}" Value="0">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Hyperlink.Style>
+                </Hyperlink>
+            </TextBlock>
+            <ListBox ItemsSource="{Binding GeneratedValues}" HorizontalAlignment="Stretch" Height="180"/>
+        </StackPanel>
     </Grid>
 </Window>

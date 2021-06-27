@@ -1,6 +1,6 @@
 ﻿using LinearCongruentialGeneratorTest.Command;
 using LinearCongruentialGeneratorTest.Model;
-using LinearCongruentialGenerator;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -8,15 +8,17 @@ namespace LinearCongruentialGeneratorTest.ViewModel
 {
     class LinearCongruentialGeneratorViewModel
     {
-        public LinearCongruentialGeneratorModel LinearCongruentialGenerator;
+        public LinearCongruentialGeneratorModel LinearCongruentialGenerator { get; set; } = new LinearCongruentialGeneratorModel();
 
-        public ObservableCollection<int> GeneratedValues { get; set; }
+        public ObservableCollection<uint> GeneratedValues { get; set; } = new ObservableCollection<uint>();
 
         public RelayCommand GenerateCommand { get; set; }
+        public RelayCommand OpenGeneratedFileCommand { get; set; }
 
         public LinearCongruentialGeneratorViewModel()
         {
             GenerateCommand = new RelayCommand(o => OnGenerate());
+            OpenGeneratedFileCommand = new RelayCommand(o => OpenGeneratedFile(), c => CanOpenGeneratedFile());
         }
 
         private void OnGenerate()
@@ -30,9 +32,19 @@ namespace LinearCongruentialGeneratorTest.ViewModel
 
             GeneratedValues.Clear();
 
-            Enumerable.Range(0, LinearCongruentialGenerator.N)
+            Enumerable.Range(0, (int)LinearCongruentialGenerator.N)
                 .ToList()
                 .ForEach(x => GeneratedValues.Add(linearCongruentialGenerator.Next()));
+        }
+
+        private void OpenGeneratedFile()
+        {
+
+        }
+
+        private bool CanOpenGeneratedFile()
+        {
+            throw new NotImplementedException();
         }
     }
 }

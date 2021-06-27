@@ -6,18 +6,18 @@ namespace LinearCongruentialGenerator
     {
         public const int RecommendedMultiplier = 48271;
 
-        private int _seed;
-        private readonly int _modulus;
-        private readonly int _multiplier;
-        private readonly int _increment;
+        private uint _seed;
+        private readonly uint _modulus;
+        private readonly uint _multiplier;
+        private readonly uint _increment;
 
         public LinearCongruentialGenerator(
-            int seed,
-            int modulus = int.MaxValue,
-            int multiplier = RecommendedMultiplier,
-            int increment = 0)
+            uint? seed,
+            uint modulus = int.MaxValue,
+            uint multiplier = RecommendedMultiplier,
+            uint increment = 0)
         {
-            _seed = seed != -1 ? seed : (int)(DateTime.Now.Ticks % modulus);
+            _seed = seed.HasValue ? seed.Value : (uint)(DateTime.Now.Ticks % modulus);
 
             _modulus = modulus;
             _multiplier = multiplier;
@@ -25,11 +25,9 @@ namespace LinearCongruentialGenerator
             _increment = increment;
         }
 
-        public int Next()
+        public uint Next()
         {
-            _seed = ((_multiplier * _seed) + _increment) % _modulus;
-
-            return _seed;
+            return _seed = ((_multiplier * _seed) + _increment) % _modulus;
         }
     }
 }

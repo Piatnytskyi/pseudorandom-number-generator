@@ -2,14 +2,14 @@
 {
     public class LinearCongruentialGeneratorModel : AbstractModel
     {
-        private int _seed;
-        private int _modulus;
-        private int _multiplier;
-        private int _increment;
+        private uint _seed;
+        private uint _modulus = int.MaxValue;
+        private uint _multiplier = LinearCongruentialGenerator.LinearCongruentialGenerator.RecommendedMultiplier;
+        private uint _increment;
 
-        private int _n;
+        private uint _n = 1;
 
-        public int Seed
+        public uint Seed
         {
             get => _seed;
             set
@@ -23,7 +23,7 @@
             }
         }
 
-        public int Modulus
+        public uint Modulus
         {
             get => _modulus;
             set
@@ -37,7 +37,7 @@
             }
         }
 
-        public int Multiplier
+        public uint Multiplier
         {
             get => _multiplier;
             set
@@ -51,7 +51,7 @@
             }
         }
 
-        public int Increment
+        public uint Increment
         {
             get => _increment;
             set
@@ -65,7 +65,7 @@
             }
         }
 
-        public int N
+        public uint N
         {
             get => _n;
             set
