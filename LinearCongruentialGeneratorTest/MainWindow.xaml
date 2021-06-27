@@ -42,7 +42,7 @@
         <StackPanel Orientation="Vertical" Grid.Row="1">
             <Button Content="Generate" Command="{Binding GenerateCommand}" />
             <TextBlock HorizontalAlignment="Center">
-                <Hyperlink Command="{Binding GoToGeneratedFileCommand}">Go to generated file.
+                <Hyperlink Command="{Binding OpenGeneratedFileCommand}">Go to generated file.
                     <Hyperlink.Style>
                         <Style TargetType="{x:Type Hyperlink}">
                             <Style.Triggers>
