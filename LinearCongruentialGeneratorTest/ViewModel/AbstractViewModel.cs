@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 
-namespace LinearCongruentialGeneratorTest.Model
+namespace LinearCongruentialGeneratorTest.ViewModel
 {
-    public abstract class AbstractModel : INotifyPropertyChanged
+    public abstract class AbstractViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

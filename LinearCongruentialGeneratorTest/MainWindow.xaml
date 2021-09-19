@@ -4,43 +4,43 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LinearCongruentialGeneratorTest"
-        xmlns:model="clr-namespace:LinearCongruentialGeneratorTest.Model"
-            xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="LinearCongruentialGeneratorTest.MainWindow"
-            d:DataContext="{d:DesignInstance Type={x:Type model:LinearCongruentialGeneratorModel}}"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="280" Width="525"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        x:Class="LinearCongruentialGeneratorTest.MainWindow"
+        Title="MainWindow" Height="331" Width="525"
         ResizeMode="NoResize">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="13*"/>
             <RowDefinition Height="119*"/>
+            <RowDefinition Height="25*"/>
         </Grid.RowDefinitions>
         <DockPanel Grid.Row="0">
             <StackPanel Orientation="Horizontal">
                 <Label Content="N:&#xD;&#xA;"/>
-                <xctk:IntegerUpDown Text="{Binding LinearCongruentialGenerator.N}" Minimum="1" />
+                <xctk:IntegerUpDown Text="{Binding N}" Minimum="1" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <StackPanel Orientation="Horizontal">
                     <Label Content="X0:&#xD;&#xA;"/>
-                    <TextBox Text="{Binding LinearCongruentialGenerator.Seed}" TextWrapping="Wrap"/>
+                    <TextBox Text="{Binding Seed}" TextWrapping="Wrap"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="M:&#xD;&#xA;&#xD;&#xA;"/>
-                    <TextBox Text="{Binding LinearCongruentialGenerator.Modulus}" TextWrapping="Wrap"/>
+                    <TextBox Text="{Binding Modulus}" TextWrapping="Wrap"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="A:&#xD;&#xA;"/>
-                    <TextBox Text="{Binding LinearCongruentialGenerator.Multiplier}" TextWrapping="Wrap"/>
+                    <TextBox Text="{Binding Multiplier}" TextWrapping="Wrap"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="C:&#xD;&#xA;"/>
-                    <TextBox Text="{Binding LinearCongruentialGenerator.Increment}" TextWrapping="Wrap"/>
+                    <TextBox Text="{Binding Increment}" TextWrapping="Wrap"/>
                 </StackPanel>
             </StackPanel>
         </DockPanel>
         <StackPanel Orientation="Vertical" Grid.Row="1">
             <Button Content="Generate" Command="{Binding GenerateCommand}" />
+            <Button Content="Calculate Period" Command="{Binding CalculatePeriodCommand}"/>
             <TextBlock HorizontalAlignment="Center">
                 <Hyperlink Command="{Binding OpenGeneratedFileCommand}">Go to generated file.
                     <Hyperlink.Style>
@@ -56,5 +56,24 @@
             </TextBlock>
             <ListBox ItemsSource="{Binding GeneratedValues}" HorizontalAlignment="Stretch" Height="180"/>
         </StackPanel>
+        <StatusBar Grid.Row="3">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="100" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <StatusBarItem Grid.Column="1">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="{Binding Status}" TextTrimming="CharacterEllipsis" Foreground="Gray" />
+                    <TextBlock Text="{Binding Period}" TextTrimming="CharacterEllipsis" Foreground="Gray" />
+                </StackPanel>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>

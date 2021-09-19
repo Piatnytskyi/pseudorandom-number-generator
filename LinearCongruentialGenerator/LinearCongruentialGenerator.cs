@@ -2,7 +2,7 @@
 
 namespace LinearCongruentialGenerator
 {
-    public class LinearCongruentialGenerator
+    public class LinearCongruentialGenerator : ICloneable
     {
         public const int RecommendedMultiplier = 48271;
 
@@ -28,6 +28,11 @@ namespace LinearCongruentialGenerator
         public uint Next()
         {
             return _seed = ((_multiplier * _seed) + _increment) % _modulus;
+        }
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
         }
     }
 }
