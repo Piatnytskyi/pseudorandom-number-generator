@@ -141,9 +141,9 @@ namespace LinearCongruentialGeneratorTest.ViewModel
             }
         }
 
-        private int _period;
+        private uint? _period;
 
-        public int Period
+        public uint? Period
         {
             get => _period;
             set
@@ -162,7 +162,7 @@ namespace LinearCongruentialGeneratorTest.ViewModel
         private string _dumpFilePath = "DumpGenerated.txt";
 
         //TODO: Needs to be injected!
-        //private ILinearCongruentialGeneratorPeriodFinder _linearCongruentialGeneratorPeriodFinder = new LinearCongruentialGeneratorPeriodFinderOptimal();
+        private ILinearCongruentialGeneratorPeriodFinder _linearCongruentialGeneratorPeriodFinder = new LinearCongruentialGeneratorPeriodFinderNaive();
 
         public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
 
@@ -208,9 +208,18 @@ namespace LinearCongruentialGeneratorTest.ViewModel
             return !HasErrors;
         }
 
+        //TODO: Make it async!
         private void OnCalculatePeriod()
         {
+            var linearCongruentialGenerator =
+                new LinearCongruentialGenerator.LinearCongruentialGenerator(
+                    (uint)Seed,
+                    (uint)Modulus,
+                    (uint)Multiplier,
+                    (uint)Increment);
 
+            Status = "The period for these parameters is following:";
+            Period = _linearCongruentialGeneratorPeriodFinder.Find(linearCongruentialGenerator).Result;
         }
 
         private bool CanCalculatePeriod()

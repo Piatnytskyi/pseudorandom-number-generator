@@ -6,13 +6,13 @@
         xmlns:local="clr-namespace:LinearCongruentialGeneratorTest"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         x:Class="LinearCongruentialGeneratorTest.MainWindow"
-        Title="MainWindow" Height="301" Width="525"
+        Title="MainWindow" Height="331" Width="525"
         ResizeMode="NoResize">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="13*"/>
             <RowDefinition Height="119*"/>
-            <RowDefinition Height="12*"/>
+            <RowDefinition Height="25*"/>
         </Grid.RowDefinitions>
         <DockPanel Grid.Row="0">
             <StackPanel Orientation="Horizontal">
