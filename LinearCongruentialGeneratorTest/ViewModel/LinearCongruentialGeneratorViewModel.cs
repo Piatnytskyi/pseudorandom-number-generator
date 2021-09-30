@@ -1,4 +1,6 @@
 ﻿using LinearCongruentialGeneratorTest.Command;
+using LinearCongruentialGeneratorTest.Commands;
+using LinearCongruentialGeneratorTest.Services;
 using LinearCongruentialGeneratorTest.Services.Abstractions;
 using LinearCongruentialGeneratorTest.Services.Implementations;
 using System;
@@ -8,6 +10,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LinearCongruentialGeneratorTest.ViewModel
 {
@@ -201,14 +204,14 @@ namespace LinearCongruentialGeneratorTest.ViewModel
         private string _dumpFilePath = "DumpGenerated.txt";
 
         //TODO: Needs to be injected!
-        private ILinearCongruentialGeneratorPeriodFinder _linearCongruentialGeneratorPeriodFinder = new LinearCongruentialGeneratorPeriodFinderNaive();
+        private ILinearCongruentialGeneratorPeriodFinder _linearCongruentialGeneratorPeriodFinder = new LinearCongruentialGeneratorPeriodFinderOptimal();
 
         public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
 
         public ObservableCollection<uint> GeneratedValues { get; set; } = new ObservableCollection<uint>();
 
         public RelayCommand GenerateCommand { get; set; }
-        public RelayCommand CalculatePeriodCommand { get; set; }
+        public AsyncCommand CalculatePeriodCommand { get; set; }
         public RelayCommand OpenGeneratedFileCommand { get; set; }
 
         public bool HasErrors => _errorsViewModel.HasErrors;
@@ -218,7 +221,7 @@ namespace LinearCongruentialGeneratorTest.ViewModel
             _errorsViewModel.ErrorsChanged += OnErrorsChanged;
 
             GenerateCommand = new RelayCommand(o => OnGenerate(), c => CanGenerate());
-            CalculatePeriodCommand = new RelayCommand(o => OnCalculatePeriod(), c => CanCalculatePeriod());
+            CalculatePeriodCommand = new AsyncCommand(o => OnCalculatePeriod(), c => CanCalculatePeriod());
             OpenGeneratedFileCommand = new RelayCommand(o => OpenGeneratedFile(), c => CanOpenGeneratedFile());
         }
 
@@ -247,13 +250,13 @@ namespace LinearCongruentialGeneratorTest.ViewModel
             return !HasErrors;
         }
 
-        private void UpdateHashingProgress(object sender, PeriodSearchProgressEventArgs periodSearchProgressEventArgs)
+        private void UpdatePeriodSearchProgress(object sender, PeriodSearchProgressEventArgs periodSearchProgressEventArgs)
         {
             ProgressDone = periodSearchProgressEventArgs.Done;
             ProgressMaximum = periodSearchProgressEventArgs.OutOf;
         }
 
-        private void OnCalculatePeriod()
+        private async Task OnCalculatePeriod()
         {
             var linearCongruentialGenerator =
                 new LinearCongruentialGenerator.LinearCongruentialGenerator(
@@ -262,8 +265,12 @@ namespace LinearCongruentialGeneratorTest.ViewModel
                     (uint)Multiplier,
                     (uint)Increment);
 
+            Status = "In progress of finding period...";
+
+            _linearCongruentialGeneratorPeriodFinder.PeriodSearchProgressChanged += UpdatePeriodSearchProgress;
+            Period = await _linearCongruentialGeneratorPeriodFinder.Find(linearCongruentialGenerator);
             Status = "The period for these parameters is following:";
-            Period = _linearCongruentialGeneratorPeriodFinder.Find(linearCongruentialGenerator).Result;
+            _linearCongruentialGeneratorPeriodFinder.PeriodSearchProgressChanged -= UpdatePeriodSearchProgress;
         }
 
         private bool CanCalculatePeriod()

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LinearCongruentialGeneratorTest
+namespace LinearCongruentialGeneratorTest.Services
 {
     public class PeriodSearchProgressEventArgs : EventArgs
     {
