@@ -1,6 +1,4 @@
 ﻿using LinearCongruentialGeneratorTest.Command;
-using LinearCongruentialGeneratorTest.Services.Abstractions;
-using LinearCongruentialGeneratorTest.Services.Implementations;
 using System;
 using System.Collections;
 using System.Collections.ObjectModel;
@@ -14,7 +12,7 @@ namespace LinearCongruentialGeneratorTest.ViewModel
     class LinearCongruentialGeneratorViewModel : AbstractViewModel, INotifyDataErrorInfo
     {
         private int _seed;
-        private int _modulus = int.MaxValue;
+        private long _modulus = int.MaxValue;
         private int _multiplier = LinearCongruentialGenerator.LinearCongruentialGenerator.RecommendedMultiplier;
         private int _increment;
 
@@ -41,7 +39,7 @@ namespace LinearCongruentialGeneratorTest.ViewModel
             }
         }
 
-        public int Modulus
+        public long Modulus
         {
             get => _modulus;
             set
@@ -157,6 +155,45 @@ namespace LinearCongruentialGeneratorTest.ViewModel
             }
         }
 
+        private int _progressDone;
+
+        public int ProgressDone
+        {
+            get => _progressDone;
+            set
+            {
+                if (_progressDone.Equals(value))
+                {
+                    return;
+                }
+                _progressDone = value;
+                RaisePropertyChanged(nameof(ProgressDone));
+                RaisePropertyChanged(nameof(IsPeriodSearchInProgress));
+            }
+        }
+
+        private int _progressMaximum;
+
+        public int ProgressMaximum
+        {
+            get => _progressMaximum;
+            set
+            {
+                if (_progressMaximum.Equals(value))
+                {
+                    return;
+                }
+                _progressMaximum = value;
+                RaisePropertyChanged(nameof(ProgressMaximum));
+                RaisePropertyChanged(nameof(IsPeriodSearchInProgress));
+            }
+        }
+
+        public bool IsPeriodSearchInProgress
+        {
+            get => ProgressDone != ProgressMaximum;
+        }
+
         private readonly ErrorsViewModel _errorsViewModel = new ErrorsViewModel();
 
         private string _dumpFilePath = "DumpGenerated.txt";
@@ -206,6 +243,12 @@ namespace LinearCongruentialGeneratorTest.ViewModel
         private bool CanGenerate()
         {
             return !HasErrors;
+        }
+
+        private void UpdateHashingProgress(object sender, PeriodSearchProgressEventArgs periodSearchProgressEventArgs)
+        {
+            ProgressDone = periodSearchProgressEventArgs.Done;
+            ProgressMaximum = periodSearchProgressEventArgs.OutOf;
         }
 
         private void OnCalculatePeriod()

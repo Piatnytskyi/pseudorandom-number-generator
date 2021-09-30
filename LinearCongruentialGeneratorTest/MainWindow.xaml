@@ -5,9 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LinearCongruentialGeneratorTest"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:Converters="clr-namespace:LinearCongruentialGeneratorTest.Converters"
         x:Class="LinearCongruentialGeneratorTest.MainWindow"
         Title="MainWindow" Height="301" Width="525"
         ResizeMode="NoResize">
+    <Window.Resources>
+        <Converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" TrueValue="Visible" FalseValue="Hidden"/>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="13*"/>
@@ -73,6 +77,9 @@
                     <TextBlock Text="{Binding Status}" TextTrimming="CharacterEllipsis" Foreground="Gray" />
                     <TextBlock Text="{Binding Period}" TextTrimming="CharacterEllipsis" Foreground="Gray" />
                 </StackPanel>
+            </StatusBarItem>
+            <StatusBarItem Grid.Column="2">
+                <ProgressBar Visibility="{Binding IsPeriodSearchInProgress, Converter={StaticResource BoolToVisibilityConverter}}" Value="{Binding ProgressDone}" Maximum="{Binding ProgressMaximum}" Width="90" Height="40" />
             </StatusBarItem>
         </StatusBar>
     </Grid>
