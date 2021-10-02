@@ -11,6 +11,11 @@ namespace LinearCongruentialGenerator
         private readonly uint _multiplier;
         private readonly uint _increment;
 
+        public uint Seed { get; }
+        public uint Modulus { get; }
+        public uint Multiplier { get; }
+        public uint Increment { get; }
+
         public LinearCongruentialGenerator(
             uint? seed,
             uint modulus = int.MaxValue,
@@ -25,7 +30,7 @@ namespace LinearCongruentialGenerator
             _increment = increment;
         }
 
-        public uint Next()
+        public virtual uint Next()
         {
             return _seed = ((_multiplier * _seed) + _increment) % _modulus;
         }

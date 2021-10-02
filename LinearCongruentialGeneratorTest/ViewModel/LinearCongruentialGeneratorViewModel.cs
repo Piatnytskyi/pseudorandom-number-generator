@@ -1,6 +1,5 @@
 ﻿using LinearCongruentialGeneratorTest.Command;
 using LinearCongruentialGeneratorTest.Commands;
-using LinearCongruentialGeneratorTest.Services;
 using LinearCongruentialGeneratorTest.Services.Abstractions;
 using LinearCongruentialGeneratorTest.Services.Implementations;
 using System;
@@ -160,43 +159,20 @@ namespace LinearCongruentialGeneratorTest.ViewModel
             }
         }
 
-        private int _progressDone;
+        private bool _isGenerationInProgress;
 
-        public int ProgressDone
+        public bool IsGenerationInProgress
         {
-            get => _progressDone;
+            get => _isGenerationInProgress;
             set
             {
-                if (_progressDone.Equals(value))
+                if (_isGenerationInProgress.Equals(value))
                 {
                     return;
                 }
-                _progressDone = value;
-                RaisePropertyChanged(nameof(ProgressDone));
-                RaisePropertyChanged(nameof(IsPeriodSearchInProgress));
+                _isGenerationInProgress = value;
+                RaisePropertyChanged(nameof(IsGenerationInProgress));
             }
-        }
-
-        private int _progressMaximum;
-
-        public int ProgressMaximum
-        {
-            get => _progressMaximum;
-            set
-            {
-                if (_progressMaximum.Equals(value))
-                {
-                    return;
-                }
-                _progressMaximum = value;
-                RaisePropertyChanged(nameof(ProgressMaximum));
-                RaisePropertyChanged(nameof(IsPeriodSearchInProgress));
-            }
-        }
-
-        public bool IsPeriodSearchInProgress
-        {
-            get => ProgressDone != ProgressMaximum;
         }
 
         private readonly ErrorsViewModel _errorsViewModel = new ErrorsViewModel();
@@ -210,7 +186,7 @@ namespace LinearCongruentialGeneratorTest.ViewModel
 
         public ObservableCollection<uint> GeneratedValues { get; set; } = new ObservableCollection<uint>();
 
-        public RelayCommand GenerateCommand { get; set; }
+        public AsyncCommand GenerateCommand { get; set; }
         public AsyncCommand CalculatePeriodCommand { get; set; }
         public RelayCommand OpenGeneratedFileCommand { get; set; }
 
@@ -220,62 +196,62 @@ namespace LinearCongruentialGeneratorTest.ViewModel
         {
             _errorsViewModel.ErrorsChanged += OnErrorsChanged;
 
-            GenerateCommand = new RelayCommand(o => OnGenerate(), c => CanGenerate());
+            GenerateCommand = new AsyncCommand(o => OnGenerate(), c => CanGenerate());
             CalculatePeriodCommand = new AsyncCommand(o => OnCalculatePeriod(), c => CanCalculatePeriod());
             OpenGeneratedFileCommand = new RelayCommand(o => OpenGeneratedFile(), c => CanOpenGeneratedFile());
         }
 
-        private void OnGenerate()
+        private async Task OnGenerate()
         {
-            var linearCongruentialGenerator =
-                new LinearCongruentialGenerator.LinearCongruentialGenerator(
-                    (uint)Seed,
-                    (uint)Modulus,
-                    (uint)Multiplier,
-                    (uint)Increment);
-
             GeneratedValues.Clear();
 
-            Enumerable.Range(0, (int)N)
-                .ToList()
-                .ForEach(x => GeneratedValues.Add(linearCongruentialGenerator.Next()));
+            File.WriteAllText(_dumpFilePath, string.Empty);
 
-            using (TextWriter textwriter = new StreamWriter(_dumpFilePath))
-                foreach (int value in GeneratedValues)
-                    textwriter.WriteLine(value);
+            var linearCongruentialGenerator =
+                new LinearCongruentialGeneratorFileDecorator(
+                    new LinearCongruentialGeneratorObservableCollectionDecorator(
+                        new LinearCongruentialGenerator.LinearCongruentialGenerator(
+                            (uint)Seed,
+                            (uint)Modulus,
+                            (uint)Multiplier,
+                            (uint)Increment),
+                        GeneratedValues),
+                    _dumpFilePath);
+
+            IsGenerationInProgress = true;
+            await Task.Run(() => Enumerable.Range(0, (int)N).ToList().ForEach(x => linearCongruentialGenerator.Next()));
+            IsGenerationInProgress = false;
         }
 
         private bool CanGenerate()
         {
-            return !HasErrors;
-        }
-
-        private void UpdatePeriodSearchProgress(object sender, PeriodSearchProgressEventArgs periodSearchProgressEventArgs)
-        {
-            ProgressDone = periodSearchProgressEventArgs.Done;
-            ProgressMaximum = periodSearchProgressEventArgs.OutOf;
+            return !HasErrors && !IsGenerationInProgress;
         }
 
         private async Task OnCalculatePeriod()
         {
+            File.WriteAllText(_dumpFilePath, string.Empty);
+
             var linearCongruentialGenerator =
-                new LinearCongruentialGenerator.LinearCongruentialGenerator(
-                    (uint)Seed,
-                    (uint)Modulus,
-                    (uint)Multiplier,
-                    (uint)Increment);
+                new LinearCongruentialGeneratorFileDecorator(
+                    new LinearCongruentialGenerator.LinearCongruentialGenerator(
+                        (uint)Seed,
+                        (uint)Modulus,
+                        (uint)Multiplier,
+                        (uint)Increment),
+                    _dumpFilePath);
 
             Status = "In progress of finding period...";
 
-            _linearCongruentialGeneratorPeriodFinder.PeriodSearchProgressChanged += UpdatePeriodSearchProgress;
+            IsGenerationInProgress = true;
             Period = await _linearCongruentialGeneratorPeriodFinder.Find(linearCongruentialGenerator);
+            IsGenerationInProgress = false;
             Status = "The period for these parameters is following:";
-            _linearCongruentialGeneratorPeriodFinder.PeriodSearchProgressChanged -= UpdatePeriodSearchProgress;
         }
 
         private bool CanCalculatePeriod()
         {
-            return !HasErrors;
+            return !HasErrors && !IsGenerationInProgress;
         }
 
         private void OpenGeneratedFile()

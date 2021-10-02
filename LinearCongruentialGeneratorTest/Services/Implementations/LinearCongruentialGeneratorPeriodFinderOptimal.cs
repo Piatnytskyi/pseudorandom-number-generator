@@ -1,23 +1,28 @@
 ﻿using LinearCongruentialGeneratorTest.Services.Abstractions;
-using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace LinearCongruentialGeneratorTest.Services.Implementations
 {
     class LinearCongruentialGeneratorPeriodFinderOptimal : ILinearCongruentialGeneratorPeriodFinder
     {
-        public event EventHandler<PeriodSearchProgressEventArgs> PeriodSearchProgressChanged;
-
-        private void OnPeriodSearchProgressChanged(PeriodSearchProgressEventArgs e)
-        {
-            EventHandler<PeriodSearchProgressEventArgs> temp = Volatile.Read(ref PeriodSearchProgressChanged);
-            if (temp != null) temp(this, e);
-        }
-
         public Task<uint> Find(LinearCongruentialGenerator.LinearCongruentialGenerator linearCongruentialGenerator)
         {
-            throw new NotImplementedException();
+            return Task.Run(() => {
+                var currentValue = linearCongruentialGenerator.Next();
+                var period = 0u;
+                var firstValue = currentValue;
+
+                for (var periodFound = false; !periodFound; ++period)
+                {
+                    var previousValue = currentValue;
+                    currentValue = linearCongruentialGenerator.Next();
+
+                    if (currentValue == firstValue || currentValue == previousValue)
+                        periodFound = true;
+                }
+
+                return period;
+            });
         }
     }
 }
