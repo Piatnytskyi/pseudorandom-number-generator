@@ -242,6 +242,7 @@ namespace LinearCongruentialGeneratorTest.ViewModel
                     _dumpFilePath);
 
             Status = "In progress of finding period...";
+            Period = null;
 
             IsGenerationInProgress = true;
             Period = await _linearCongruentialGeneratorPeriodFinder.Find(linearCongruentialGenerator);
