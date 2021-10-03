@@ -20,7 +20,7 @@
             _linearCongruentialGenerator = component;
         }
 
-        public override uint Next()
+        public override ulong Next()
         {
             return _linearCongruentialGenerator.Next();
         }

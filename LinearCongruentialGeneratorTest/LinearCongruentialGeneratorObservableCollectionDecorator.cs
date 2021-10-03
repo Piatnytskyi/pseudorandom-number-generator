@@ -6,17 +6,17 @@ namespace LinearCongruentialGeneratorTest
 {
     public class LinearCongruentialGeneratorObservableCollectionDecorator : LinearCongruentialGeneratorAbstractDecorator
     {
-        private ObservableCollection<uint> _observableCollection;
+        private ObservableCollection<ulong> _observableCollection;
 
         public LinearCongruentialGeneratorObservableCollectionDecorator(
             LinearCongruentialGenerator.LinearCongruentialGenerator linearCongruentialGenerator,
-            ObservableCollection<uint> observableCollection)
+            ObservableCollection<ulong> observableCollection)
             : base(linearCongruentialGenerator)
         {
             _observableCollection = observableCollection;
         }
 
-        public override uint Next()
+        public override ulong Next()
         {
             var currentValue = _linearCongruentialGenerator.Next();
             Application.Current.Dispatcher.BeginInvoke(new Action(() => _observableCollection.Add(currentValue)));

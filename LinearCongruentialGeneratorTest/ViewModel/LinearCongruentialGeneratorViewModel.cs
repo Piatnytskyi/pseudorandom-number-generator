@@ -15,14 +15,14 @@ namespace LinearCongruentialGeneratorTest.ViewModel
 {
     class LinearCongruentialGeneratorViewModel : AbstractViewModel, INotifyDataErrorInfo
     {
-        private int _seed;
-        private long _modulus = int.MaxValue;
-        private int _multiplier = LinearCongruentialGenerator.LinearCongruentialGenerator.RecommendedMultiplier;
-        private int _increment;
+        private ulong _seed;
+        private ulong _modulus = int.MaxValue;
+        private ulong _multiplier = LinearCongruentialGenerator.LinearCongruentialGenerator.RecommendedMultiplier;
+        private ulong _increment;
 
         private int _n = 1;
 
-        public int Seed
+        public ulong Seed
         {
             get => _seed;
             set
@@ -43,7 +43,7 @@ namespace LinearCongruentialGeneratorTest.ViewModel
             }
         }
 
-        public long Modulus
+        public ulong Modulus
         {
             get => _modulus;
             set
@@ -64,7 +64,7 @@ namespace LinearCongruentialGeneratorTest.ViewModel
             }
         }
 
-        public int Multiplier
+        public ulong Multiplier
         {
             get => _multiplier;
             set
@@ -85,7 +85,7 @@ namespace LinearCongruentialGeneratorTest.ViewModel
             }
         }
 
-        public int Increment
+        public ulong Increment
         {
             get => _increment;
             set
@@ -184,7 +184,7 @@ namespace LinearCongruentialGeneratorTest.ViewModel
 
         public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
 
-        public ObservableCollection<uint> GeneratedValues { get; set; } = new ObservableCollection<uint>();
+        public ObservableCollection<ulong> GeneratedValues { get; set; } = new ObservableCollection<ulong>();
 
         public AsyncCommand GenerateCommand { get; set; }
         public AsyncCommand CalculatePeriodCommand { get; set; }
@@ -207,19 +207,25 @@ namespace LinearCongruentialGeneratorTest.ViewModel
 
             File.WriteAllText(_dumpFilePath, string.Empty);
 
-            var linearCongruentialGenerator =
-                new LinearCongruentialGeneratorFileDecorator(
-                    new LinearCongruentialGeneratorObservableCollectionDecorator(
-                        new LinearCongruentialGenerator.LinearCongruentialGenerator(
-                            (uint)Seed,
-                            (uint)Modulus,
-                            (uint)Multiplier,
-                            (uint)Increment),
-                        GeneratedValues),
-                    _dumpFilePath);
-
             IsGenerationInProgress = true;
-            await Task.Run(() => Enumerable.Range(0, (int)N).ToList().ForEach(x => linearCongruentialGenerator.Next()));
+
+            await Task.Run(() =>
+            {
+                using (var linearCongruentialGenerator =
+                    new LinearCongruentialGeneratorFileDecorator(
+                        new LinearCongruentialGeneratorObservableCollectionDecorator(
+                            new LinearCongruentialGenerator.LinearCongruentialGenerator(
+                                Seed,
+                                Modulus,
+                                Multiplier,
+                                Increment),
+                            GeneratedValues),
+                        _dumpFilePath))
+                {
+                    Enumerable.Range(0, (int)N).ToList().ForEach(x => linearCongruentialGenerator.Next());
+                }
+            });
+
             IsGenerationInProgress = false;
         }
 
@@ -235,10 +241,10 @@ namespace LinearCongruentialGeneratorTest.ViewModel
             var linearCongruentialGenerator =
                 new LinearCongruentialGeneratorFileDecorator(
                     new LinearCongruentialGenerator.LinearCongruentialGenerator(
-                        (uint)Seed,
-                        (uint)Modulus,
-                        (uint)Multiplier,
-                        (uint)Increment),
+                        Seed,
+                        Modulus,
+                        Multiplier,
+                        Increment),
                     _dumpFilePath);
 
             Status = "In progress of finding period...";

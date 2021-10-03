@@ -3,22 +3,28 @@ using System.IO;
 
 namespace LinearCongruentialGeneratorTest
 {
-    public class LinearCongruentialGeneratorFileDecorator : LinearCongruentialGeneratorAbstractDecorator
+    public class LinearCongruentialGeneratorFileDecorator : LinearCongruentialGeneratorAbstractDecorator, IDisposable
     {
-        private string _filename;
+        private StreamWriter _streamWriter;
 
         public LinearCongruentialGeneratorFileDecorator(
             LinearCongruentialGenerator.LinearCongruentialGenerator linearCongruentialGenerator,
             string filename)
             : base(linearCongruentialGenerator)
         {
-            _filename = filename;
+            _streamWriter = new StreamWriter(filename);
         }
 
-        public override uint Next()
+        public void Dispose()
+        {
+            _streamWriter.Close();
+        }
+
+        public override ulong Next()
         {
             var currentValue = _linearCongruentialGenerator.Next();
-            File.AppendAllText(_filename, currentValue.ToString() + Environment.NewLine);
+
+            _streamWriter.WriteLine(currentValue);
 
             return currentValue;
         }
