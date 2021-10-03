@@ -7,7 +7,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:Converters="clr-namespace:LinearCongruentialGeneratorTest.Converters"
         x:Class="LinearCongruentialGeneratorTest.MainWindow"
-        Title="MainWindow" Height="331" Width="525"
+        Title="MainWindow" Height="365" Width="525"
         ResizeMode="NoResize">
     <Window.Resources>
         <Converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" TrueValue="Visible" FalseValue="Hidden"/>
@@ -79,7 +79,7 @@
                 </StackPanel>
             </StatusBarItem>
             <StatusBarItem Grid.Column="2">
-                <ProgressBar Visibility="{Binding IsPeriodSearchInProgress, Converter={StaticResource BoolToVisibilityConverter}}" Value="{Binding ProgressDone}" Maximum="{Binding ProgressMaximum}" Width="90" Height="40" />
+                <ProgressBar Visibility="{Binding IsGenerationInProgress, Converter={StaticResource BoolToVisibilityConverter}}" IsIndeterminate="True" Width="90" Height="40" />
             </StatusBarItem>
         </StatusBar>
     </Grid>

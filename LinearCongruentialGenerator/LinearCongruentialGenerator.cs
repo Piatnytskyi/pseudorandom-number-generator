@@ -6,18 +6,23 @@ namespace LinearCongruentialGenerator
     {
         public const int RecommendedMultiplier = 48271;
 
-        private uint _seed;
-        private readonly uint _modulus;
-        private readonly uint _multiplier;
-        private readonly uint _increment;
+        private ulong _seed;
+        private readonly ulong _modulus;
+        private readonly ulong _multiplier;
+        private readonly ulong _increment;
+
+        public ulong Seed { get => _seed; }
+        public ulong Modulus { get => _modulus; }
+        public ulong Multiplier { get => _multiplier; }
+        public ulong Increment { get => _increment; }
 
         public LinearCongruentialGenerator(
-            uint? seed,
-            uint modulus = int.MaxValue,
-            uint multiplier = RecommendedMultiplier,
-            uint increment = 0)
+            ulong? seed,
+            ulong modulus = int.MaxValue,
+            ulong multiplier = RecommendedMultiplier,
+            ulong increment = 0)
         {
-            _seed = seed.HasValue ? seed.Value : (uint)(DateTime.Now.Ticks % modulus);
+            _seed = seed ?? (ulong)DateTime.Now.Ticks % modulus;
 
             _modulus = modulus;
             _multiplier = multiplier;
@@ -25,7 +30,7 @@ namespace LinearCongruentialGenerator
             _increment = increment;
         }
 
-        public uint Next()
+        public virtual ulong Next()
         {
             return _seed = ((_multiplier * _seed) + _increment) % _modulus;
         }
