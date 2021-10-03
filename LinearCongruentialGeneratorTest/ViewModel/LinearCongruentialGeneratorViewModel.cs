@@ -1,4 +1,5 @@
 ﻿using LinearCongruentialGeneratorTest.Command;
+using LinearCongruentialGeneratorTest.Commands;
 using LinearCongruentialGeneratorTest.Services.Abstractions;
 using LinearCongruentialGeneratorTest.Services.Implementations;
 using System;
@@ -8,19 +9,20 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LinearCongruentialGeneratorTest.ViewModel
 {
     class LinearCongruentialGeneratorViewModel : AbstractViewModel, INotifyDataErrorInfo
     {
-        private int _seed;
-        private int _modulus = int.MaxValue;
-        private int _multiplier = LinearCongruentialGenerator.LinearCongruentialGenerator.RecommendedMultiplier;
-        private int _increment;
+        private ulong _seed;
+        private ulong _modulus = int.MaxValue;
+        private ulong _multiplier = LinearCongruentialGenerator.LinearCongruentialGenerator.RecommendedMultiplier;
+        private ulong _increment;
 
         private int _n = 1;
 
-        public int Seed
+        public ulong Seed
         {
             get => _seed;
             set
@@ -41,7 +43,7 @@ namespace LinearCongruentialGeneratorTest.ViewModel
             }
         }
 
-        public int Modulus
+        public ulong Modulus
         {
             get => _modulus;
             set
@@ -62,7 +64,7 @@ namespace LinearCongruentialGeneratorTest.ViewModel
             }
         }
 
-        public int Multiplier
+        public ulong Multiplier
         {
             get => _multiplier;
             set
@@ -83,7 +85,7 @@ namespace LinearCongruentialGeneratorTest.ViewModel
             }
         }
 
-        public int Increment
+        public ulong Increment
         {
             get => _increment;
             set
@@ -157,19 +159,35 @@ namespace LinearCongruentialGeneratorTest.ViewModel
             }
         }
 
+        private bool _isGenerationInProgress;
+
+        public bool IsGenerationInProgress
+        {
+            get => _isGenerationInProgress;
+            set
+            {
+                if (_isGenerationInProgress.Equals(value))
+                {
+                    return;
+                }
+                _isGenerationInProgress = value;
+                RaisePropertyChanged(nameof(IsGenerationInProgress));
+            }
+        }
+
         private readonly ErrorsViewModel _errorsViewModel = new ErrorsViewModel();
 
         private string _dumpFilePath = "DumpGenerated.txt";
 
         //TODO: Needs to be injected!
-        private ILinearCongruentialGeneratorPeriodFinder _linearCongruentialGeneratorPeriodFinder = new LinearCongruentialGeneratorPeriodFinderNaive();
+        private ILinearCongruentialGeneratorPeriodFinder _linearCongruentialGeneratorPeriodFinder = new LinearCongruentialGeneratorPeriodFinderOptimal();
 
         public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
 
-        public ObservableCollection<uint> GeneratedValues { get; set; } = new ObservableCollection<uint>();
+        public ObservableCollection<ulong> GeneratedValues { get; set; } = new ObservableCollection<ulong>();
 
-        public RelayCommand GenerateCommand { get; set; }
-        public RelayCommand CalculatePeriodCommand { get; set; }
+        public AsyncCommand GenerateCommand { get; set; }
+        public AsyncCommand CalculatePeriodCommand { get; set; }
         public RelayCommand OpenGeneratedFileCommand { get; set; }
 
         public bool HasErrors => _errorsViewModel.HasErrors;
@@ -178,53 +196,69 @@ namespace LinearCongruentialGeneratorTest.ViewModel
         {
             _errorsViewModel.ErrorsChanged += OnErrorsChanged;
 
-            GenerateCommand = new RelayCommand(o => OnGenerate(), c => CanGenerate());
-            CalculatePeriodCommand = new RelayCommand(o => OnCalculatePeriod(), c => CanCalculatePeriod());
+            GenerateCommand = new AsyncCommand(o => OnGenerate(), c => CanGenerate());
+            CalculatePeriodCommand = new AsyncCommand(o => OnCalculatePeriod(), c => CanCalculatePeriod());
             OpenGeneratedFileCommand = new RelayCommand(o => OpenGeneratedFile(), c => CanOpenGeneratedFile());
         }
 
-        private void OnGenerate()
+        private async Task OnGenerate()
         {
-            var linearCongruentialGenerator =
-                new LinearCongruentialGenerator.LinearCongruentialGenerator(
-                    (uint)Seed,
-                    (uint)Modulus,
-                    (uint)Multiplier,
-                    (uint)Increment);
-
             GeneratedValues.Clear();
 
-            Enumerable.Range(0, (int)N)
-                .ToList()
-                .ForEach(x => GeneratedValues.Add(linearCongruentialGenerator.Next()));
+            File.WriteAllText(_dumpFilePath, string.Empty);
 
-            using (TextWriter textwriter = new StreamWriter(_dumpFilePath))
-                foreach (int value in GeneratedValues)
-                    textwriter.WriteLine(value);
+            IsGenerationInProgress = true;
+
+            await Task.Run(() =>
+            {
+                using (var linearCongruentialGenerator =
+                    new LinearCongruentialGeneratorFileDecorator(
+                        new LinearCongruentialGeneratorObservableCollectionDecorator(
+                            new LinearCongruentialGenerator.LinearCongruentialGenerator(
+                                Seed,
+                                Modulus,
+                                Multiplier,
+                                Increment),
+                            GeneratedValues),
+                        _dumpFilePath))
+                {
+                    Enumerable.Range(0, (int)N).ToList().ForEach(x => linearCongruentialGenerator.Next());
+                }
+            });
+
+            IsGenerationInProgress = false;
         }
 
         private bool CanGenerate()
         {
-            return !HasErrors;
+            return !HasErrors && !IsGenerationInProgress;
         }
 
-        //TODO: Make it async!
-        private void OnCalculatePeriod()
+        private async Task OnCalculatePeriod()
         {
-            var linearCongruentialGenerator =
-                new LinearCongruentialGenerator.LinearCongruentialGenerator(
-                    (uint)Seed,
-                    (uint)Modulus,
-                    (uint)Multiplier,
-                    (uint)Increment);
+            File.WriteAllText(_dumpFilePath, string.Empty);
 
+            var linearCongruentialGenerator =
+                new LinearCongruentialGeneratorFileDecorator(
+                    new LinearCongruentialGenerator.LinearCongruentialGenerator(
+                        Seed,
+                        Modulus,
+                        Multiplier,
+                        Increment),
+                    _dumpFilePath);
+
+            Status = "In progress of finding period...";
+            Period = null;
+
+            IsGenerationInProgress = true;
+            Period = await _linearCongruentialGeneratorPeriodFinder.Find(linearCongruentialGenerator);
+            IsGenerationInProgress = false;
             Status = "The period for these parameters is following:";
-            Period = _linearCongruentialGeneratorPeriodFinder.Find(linearCongruentialGenerator).Result;
         }
 
         private bool CanCalculatePeriod()
         {
-            return !HasErrors;
+            return !HasErrors && !IsGenerationInProgress;
         }
 
         private void OpenGeneratedFile()
